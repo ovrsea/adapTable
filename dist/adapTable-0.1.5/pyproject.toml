@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "adapTable"
+version = "0.1.5"
+description = ""
+authors = ["Paul Couturier <paul.couturier@ovrsea.com>"]
+include = ["adaptable/_data_access/*"]
+
+
+[tool.poetry.dependencies]
+python = "^3.9"
+black = "^23.3.0"
+boto3 = "^1.26.103"
+psycopg2 = "^2.9.5"
+pandas = "^1.5.3"
+
+[tool.poetry.dev-dependencies]
+boto3 = "^1.26.85"
+pytest = "^7.2.2"
+pandas = "^1.5.3"
+psycopg2 = "^2.9.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

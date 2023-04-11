@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleaning.archiving &mdash; adapTable  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            adapTable
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">adaptable</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">adapTable</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleaning.archiving</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleaning.archiving</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">adaptable.cleaning._utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">retrieve_the_metabase_card_id_of_not_recently_looked_at_card</span><span class="p">,</span>
+    <span class="n">retrieve_the_metabase_dashboard_id_of_not_recently_looked_at_dashboard</span><span class="p">,</span>
+    <span class="n">delete_report_dashboardcard_on_card_id</span><span class="p">,</span>
+    <span class="n">archived_report_cards_using_id_list</span><span class="p">,</span>
+    <span class="n">archived_report_dashboards_using_id_list</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="archiving_unused_cards"><a class="viewcode-back" href="../../cleaning.html#cleaning.archiving.archiving_unused_cards">[docs]</a><span class="k">def</span> <span class="nf">archiving_unused_cards</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">freshness_in_month</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Archiving cards that were not looked at in the last months both through dashboard or direct observation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    conn: psycopg2 DBAPI2 connector</span>
+<span class="sd">        Connexion to your Metabase Database</span>
+<span class="sd">    freshness_in_month : int</span>
+<span class="sd">        The minimal last seen period in month required for a card not to be archived as considered useless.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Nothing as it has been build to change the Metabase DB synchronously.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Step 1: Found all the cards unused in the delay_in_month</span>
+    <span class="n">df_metabase_card_id</span> <span class="o">=</span> <span class="n">retrieve_the_metabase_card_id_of_not_recently_looked_at_card</span><span class="p">(</span>
+        <span class="n">conn</span><span class="p">,</span> <span class="n">freshness_in_month</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">df_metabase_card_id</span><span class="p">)</span>
+    <span class="n">card_id_list</span> <span class="o">=</span> <span class="n">df_metabase_card_id</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+    <span class="c1"># Step 2: Remove the row that call the id_ concerned from metabase_dashboard_cards</span>
+    <span class="n">delete_report_dashboardcard_on_card_id</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">card_id_list</span><span class="p">)</span>
+
+    <span class="c1"># Step 3: Archived the row in report_cards</span>
+    <span class="n">archived_report_cards_using_id_list</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">card_id_list</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="archiving_unused_dashboards"><a class="viewcode-back" href="../../cleaning.html#cleaning.archiving.archiving_unused_dashboards">[docs]</a><span class="k">def</span> <span class="nf">archiving_unused_dashboards</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">freshness_in_month</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Archiving dashboards that were not looked at once in the last months.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    conn: psycopg2 DBAPI2 connector</span>
+<span class="sd">        Connexion to your Metabase Database</span>
+<span class="sd">    freshness_in_month : int</span>
+<span class="sd">        The minimal last seen period in month required for a card not to be archived as considered useless.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Nothing as it has been build to change the Metabase DB synchronously.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Step 1: Found all the dashboards unused in the delay_in_month</span>
+    <span class="n">df_metabase_dashboard_id</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">retrieve_the_metabase_dashboard_id_of_not_recently_looked_at_dashboard</span><span class="p">(</span>
+            <span class="n">conn</span><span class="p">,</span> <span class="n">freshness_in_month</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">df_metabase_dashboard_id</span><span class="p">)</span>
+    <span class="n">dashboard_id_list</span> <span class="o">=</span> <span class="n">df_metabase_dashboard_id</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Step 2: Archived the row in report_dashboards</span>
+    <span class="n">archived_report_dashboards_using_id_list</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">dashboard_id_list</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Paul Couturier.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
