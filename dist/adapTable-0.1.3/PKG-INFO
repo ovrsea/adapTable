@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: adaptable
+Version: 0.1.3
+Summary: 
+Author: Paul Couturier
+Author-email: paul.couturier@ovrsea.com
+Requires-Python: >=3.9,<4.0
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.9
+Requires-Dist: black (>=23.3.0,<24.0.0)
+Requires-Dist: boto3 (>=1.26.103,<2.0.0)
+Requires-Dist: pandas (>=1.5.3,<2.0.0)
+Requires-Dist: psycopg2 (>=2.9.5,<3.0.0)
